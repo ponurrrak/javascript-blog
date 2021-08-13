@@ -1,8 +1,14 @@
 'use strict';
 
 const titleClickHandler = function(e){
-  console.log('Link was clicked!');
-  console.log(e);
+  const activeLinks = document.querySelectorAll('.titles a.active');
+  for (let activeLink of activeLinks){
+    activeLink.classList.remove('active');
+  }
+  const activeArticles = document.querySelectorAll('article.post.active');
+  for (let activeArticle of activeArticles){
+    activeArticle.classList.remove('active');
+  }  
 }
 
 const links = document.querySelectorAll('.titles a');
