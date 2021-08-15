@@ -6,20 +6,16 @@ const optActiveClass = 'active';
 const optSelectors = {
   article: '.post',
   articleTitle: '.post-title',
-  activeArticle: '.post.' + optActiveClass,
-  /*activeArticle: this.article + '.' + optActiveClass,
-  Poproszę o wyjaśnienie, dlaczego powyższy wiersz nie działa. Ja to kiedyś rozumiałem, a teraz pustka w głowie*/
   titleList: '.titles',
-  titleLinks: '.titles a',
-  activeTitleLink: '.titles a.' + optActiveClass,
   firstTitleLink: 'li:first-of-type a'
 }
 
-const titleLinkTemplate = {
-  firstPart: '<li><a href=\"#',
-  thirdPart: '\"><span>',
-  fifthPart: '</span></a></li>'
-}
+optSelectors.activeArticle = optSelectors.article + '.' + optActiveClass;
+optSelectors.titleLinks = optSelectors.titleList + ' a';
+optSelectors.activeTitleLink = optSelectors.titleLinks + '.' + optActiveClass;
+
+const optTitleLinkTemplate = '<li><a href=\"#{article-id}\"><span>{article-title}</span></a></li>'
+// {article-id} and {article-title} in string above are placeholders only to be replaced in further code by values of variables
 
 
 const titleClickHandler = function(e){
@@ -44,9 +40,8 @@ const generateTitleLinks = function(selector){
   const listofArticles = document.querySelectorAll(selector);
   let newTitleListContent = '';
   for(let article of listofArticles){
-    newTitleListContent += (titleLinkTemplate.firstPart + article.getAttribute('id') +
-    titleLinkTemplate.thirdPart + article.querySelector(optSelectors.articleTitle).textContent +
-    titleLinkTemplate.fifthPart);
+    newTitleListContent += optTitleLinkTemplate.replace('{article-id}', article.getAttribute('id'))
+    .replace('{article-title}', article.querySelector(optSelectors.articleTitle).textContent);
   }
   titleList.innerHTML = newTitleListContent;
   titleList.querySelector(optSelectors.firstTitleLink).classList.add(optActiveClass);
@@ -55,6 +50,7 @@ const generateTitleLinks = function(selector){
     link.addEventListener('click', titleClickHandler);
   }
 }
+
 
 generateTitleLinks(optSelectors.article);
 }

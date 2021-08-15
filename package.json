@@ -9,7 +9,7 @@
     "init:files": "touch README.md index.html sass/style.scss js/script.js",
     "init:gitignore": "curl https://raw.githubusercontent.com/github/gitignore/master/Node.gitignore -o .gitignore",
     "test": "npm-run-all test:*",
-    "test:html": "html-validate *.html",
+    "test:html": "html-validate *.html",    
     "build": "npm-run-all build:* test",
     "build:sass": "node-sass --output-style compact -o css sass",
     "build:autoprefixer": "postcss css/*.css --use autoprefixer -d css",
@@ -26,6 +26,8 @@
   "devDependencies": {
     "autoprefixer": "^10.2.4",
     "browser-sync": "^2.27.5",
+    "eslint": "^7.32.0",
+    "eslint-plugin-react": "^7.24.0",
     "html-validate": "^5.2.0",
     "mkdirp": "^1.0.4",
     "node-sass": "^6.0.1",

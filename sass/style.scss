@@ -101,10 +101,17 @@ body {
 
 /* Post */
 
+@keyframes post-opacity-change {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
 .post {
   display: none;
   &.active {
     display: block;
+    animation-name: post-opacity-change;
+    animation-duration: 2s;
   }
 }
 
