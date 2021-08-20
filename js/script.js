@@ -1,14 +1,6 @@
 'use strict';
 
 {
-  const optTitleLinkTemplate = '<li><a href="#{article-id}"><span>{article-title}</span></a></li>';
-  // {article-id} and {article-title} in string above are placeholders only to be replaced in further code by values of variables
-
-  const optTagWrapperTemplate = '<li><a href="#tag-{tag}">{tag}</a></li>';
-  // same idea as above. It's also implemented below in other variables or properties with names based on word "template"
-
-  const optArticleAuthorTemplate = '<a href="#author-{author}">by {author}</a>';
-
   const optActiveClass = 'active';
 
   const optSelectors = {
@@ -19,16 +11,16 @@
     tagLink: 'a[href^="#tag-"]',
     articleAuthor: '.post-author',
     authorLink: 'a[href^="#author-"]',
-    linkTemplate: 'a[href="{link}"]'
+    linkTemplate: function(link){
+      return `a[href="${link}"]`;
+    }
   };
 
   optSelectors.activeArticle = optSelectors.article + '.' + optActiveClass;
   optSelectors.titleLinks = optSelectors.titleList + ' a';
   optSelectors.activeTitleLink = optSelectors.titleLinks + '.' + optActiveClass;
   optSelectors.activeTagLink = optSelectors.tagLink + '.' + optActiveClass;
-  optSelectors.articleTagggedTemplate = optSelectors.article + '[data-tags~="{tagText}"]';
   optSelectors.activeArticleAuthor = optSelectors.articleAuthor + ' .' + optActiveClass;
-  optSelectors.articleBySameAuthorTemplate = optSelectors.article + '[data-author="{authorText}"]';
 
   const fullListofArticles = document.querySelectorAll(optSelectors.article);
 
@@ -52,15 +44,16 @@
     const titleList = document.querySelector(optSelectors.titleList);
     titleList.innerHTML = '';
     let newTitleListContent = '';
-    const listofArticles = (selector !== undefined) ? document.querySelectorAll(selector) : fullListofArticles;
+    const listofArticles = selector ? document.querySelectorAll(selector) : fullListofArticles;
     for(let article of listofArticles){
-      newTitleListContent += optTitleLinkTemplate.replace('{article-id}', article.getAttribute('id')).replace('{article-title}', article.querySelector(optSelectors.articleTitle).textContent);
+      newTitleListContent += `<li><a href="#${article.getAttribute('id')}"><span>${article.querySelector(optSelectors.articleTitle).textContent}</span></a></li>`;
     }
     titleList.innerHTML = newTitleListContent;
     const links = document.querySelectorAll(optSelectors.titleLinks);
     for(let link of links){
       link.addEventListener('click', titleClickHandler);
-      for(let activeArticle of document.querySelectorAll(optSelectors.activeArticle)){
+      const activeArticles = document.querySelectorAll(optSelectors.activeArticle);
+      for(let activeArticle of activeArticles){
         if(link.getAttribute('href').slice(1) === activeArticle.getAttribute('id')){
           link.classList.add(optActiveClass);
         }
@@ -72,8 +65,9 @@
     for(let article of fullListofArticles){
       const articleTagsList = article.querySelector(optSelectors.articleTags);
       let articleTagsListContent = '';
-      for(let tag of article.getAttribute('data-tags').split(' ')){
-        articleTagsListContent += optTagWrapperTemplate.replace(/\{tag\}/g, tag);
+      const tags = article.getAttribute('data-tags').split(' ');
+      for(let tag of tags){
+        articleTagsListContent += `<li><a href="#tag-${tag}">${tag}</a></li>`;
       }
       articleTagsList.innerHTML = articleTagsListContent;
     }
@@ -84,24 +78,27 @@
     const clickedElement = this;
     const newActiveTagLink = clickedElement.getAttribute('href');
     const newActiveTagText =  newActiveTagLink.slice(5);
-    for(let activeTagLink of document.querySelectorAll(optSelectors.activeTagLink)){
+    const activeTagLinks = document.querySelectorAll(optSelectors.activeTagLink);
+    for(let activeTagLink of activeTagLinks){
       activeTagLink.classList.remove(optActiveClass);
     }
-    for(let newActiveTag of document.querySelectorAll(optSelectors.linkTemplate.replace('{link}', newActiveTagLink))){
+    const newActiveTags = document.querySelectorAll(optSelectors.linkTemplate(newActiveTagLink));
+    for(let newActiveTag of newActiveTags){
       newActiveTag.classList.add(optActiveClass);
     }
-    generateTitleLinks(optSelectors.articleTagggedTemplate.replace(/\{tagText\}/g, newActiveTagText));
+    generateTitleLinks(`${optSelectors.article}[data-tags~="${newActiveTagText}"]`);
   };
 
   const addClickListenersToTags = function(){
-    for(let tagLink of document.querySelectorAll(optSelectors.tagLink)){
+    const tagLinks = document.querySelectorAll(optSelectors.tagLink);
+    for(let tagLink of tagLinks){
       tagLink.addEventListener('click', tagClickHandler);
     }
   };
 
   const generateAuthors = function(){
     for(let article of fullListofArticles){
-      article.querySelector(optSelectors.articleAuthor).innerHTML = optArticleAuthorTemplate.replace(/\{author\}/g, article.getAttribute('data-author'));
+      article.querySelector(optSelectors.articleAuthor).innerHTML = `<a href="#author-${article.getAttribute('data-author')}">by ${article.getAttribute('data-author')}</a>`;
     }
   };
 
@@ -110,17 +107,20 @@
     const clickedElement = this;
     const newActiveAuthorLink = clickedElement.getAttribute('href');
     const newActiveAuthorText =  newActiveAuthorLink.slice(8);
-    for(let activeAuthorLink of document.querySelectorAll(optSelectors.activeArticleAuthor)){
+    const activeAuthorLinks = document.querySelectorAll(optSelectors.activeArticleAuthor);
+    for(let activeAuthorLink of activeAuthorLinks){
       activeAuthorLink.classList.remove(optActiveClass);
     }
-    for(let newActiveAuthor of document.querySelectorAll(optSelectors.linkTemplate.replace('{link}', newActiveAuthorLink))){
+    const newActiveAuthors = document.querySelectorAll(optSelectors.linkTemplate(newActiveAuthorLink));
+    for(let newActiveAuthor of newActiveAuthors){
       newActiveAuthor.classList.add(optActiveClass);
     }
-    generateTitleLinks(optSelectors.articleBySameAuthorTemplate.replace(/\{authorText\}/g, newActiveAuthorText));
+    generateTitleLinks(`${optSelectors.article}[data-author="${newActiveAuthorText}"]`);
   };
 
   const addClickListenersToAuthors = function(){
-    for(let authorLink of document.querySelectorAll(optSelectors.authorLink)){
+    const authorLinks = document.querySelectorAll(optSelectors.authorLink);
+    for(let authorLink of authorLinks){
       authorLink.addEventListener('click', authorClickHandler);
     }
   };
