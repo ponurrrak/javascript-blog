@@ -1,7 +1,11 @@
 'use strict';
 
 {
-  const optActiveClass = 'active';
+  const optClassesConfig = {
+    activeClassName: 'active',
+    cloudClassCount: 5,
+    cloudClassPrefix: 'tag-size-'
+  };
 
   const optSelectors = {
     article: '.post',
@@ -14,20 +18,24 @@
     linkTemplate: function(link){
       return `a[href="${link}"]`;
     },
-    tagsListWrapper: '.list.tags'
+    tagsCloudListWrapper: '.list.tags',
+    articleTagTemplate: function(tag){
+      return `<li><a href="#tag-${tag}">${tag}</a></li>`;
+    },
+    cloudTagsLastLink: 'li:last-of-type a'
   };
+
+  optSelectors.activeArticle = optSelectors.article + '.' + optClassesConfig.activeClassName;
+  optSelectors.titleLinks = optSelectors.titleList + ' a';
+  optSelectors.activeTitleLink = optSelectors.titleLinks + '.' + optClassesConfig.activeClassName;
+  optSelectors.activeTagLink = optSelectors.tagLink + '.' + optClassesConfig.activeClassName;
+  optSelectors.activeArticleAuthor = optSelectors.articleAuthor + ' .' + optClassesConfig.activeClassName;
 
   const substringsToRemoveLength = {
     inTagLink: '#tag-'.length,
     inTitleLink: '#'.length,
     inAuthorLink: '#author-'.length
   };
-
-  optSelectors.activeArticle = optSelectors.article + '.' + optActiveClass;
-  optSelectors.titleLinks = optSelectors.titleList + ' a';
-  optSelectors.activeTitleLink = optSelectors.titleLinks + '.' + optActiveClass;
-  optSelectors.activeTagLink = optSelectors.tagLink + '.' + optActiveClass;
-  optSelectors.activeArticleAuthor = optSelectors.articleAuthor + ' .' + optActiveClass;
 
   const fullListofArticles = document.querySelectorAll(optSelectors.article);
 
@@ -37,14 +45,14 @@
     const newActiveArticleId = clickedElement.getAttribute('href');
     const activeLinks = document.querySelectorAll(optSelectors.activeTitleLink);
     for(let activeLink of activeLinks){
-      activeLink.classList.remove(optActiveClass);
+      activeLink.classList.remove(optClassesConfig.activeClassName);
     }
-    clickedElement.classList.add(optActiveClass);
+    clickedElement.classList.add(optClassesConfig.activeClassName);
     const activeArticles = document.querySelectorAll(optSelectors.activeArticle);
     for(let activeArticle of activeArticles){
-      activeArticle.classList.remove(optActiveClass);
+      activeArticle.classList.remove(optClassesConfig.activeClassName);
     }
-    document.querySelector(newActiveArticleId).classList.add(optActiveClass);
+    document.querySelector(newActiveArticleId).classList.add(optClassesConfig.activeClassName);
   };
 
   const generateTitleLinks = function(selector){
@@ -62,22 +70,51 @@
       const activeArticles = document.querySelectorAll(optSelectors.activeArticle);
       for(let activeArticle of activeArticles){
         if(link.getAttribute('href').slice(substringsToRemoveLength.inTitleLink) === activeArticle.getAttribute('id')){
-          link.classList.add(optActiveClass);
+          link.classList.add(optClassesConfig.activeClassName);
         }
       }
     }
   };
 
+  const calculateTagsParams = function(tags){
+    const tagsPopularityList = Object.values(tags);
+    return {
+      max: Math.max(...tagsPopularityList),
+      min: Math.min(...tagsPopularityList),
+    };
+  };
+
+  const calculateTagClass = function(count, params){
+    const classNum = Math.floor((count - params.min) / (params.max - params.min) * (optClassesConfig.cloudClassCount - 1) +1);
+    return optClassesConfig.cloudClassPrefix + classNum;
+  };
+
+  const generateTagsCloud = function(uniqueTagsCounter){
+    const tagsParams = calculateTagsParams(uniqueTagsCounter);
+    const tagsCloudListWrapper = document.querySelector(optSelectors.tagsCloudListWrapper);
+    for(let tag in uniqueTagsCounter){
+      tagsCloudListWrapper.insertAdjacentHTML('beforeend', optSelectors.articleTagTemplate(tag));
+      tagsCloudListWrapper.querySelector(optSelectors.cloudTagsLastLink).classList.add(calculateTagClass(uniqueTagsCounter[tag], tagsParams));
+    }
+  };
+
   const generateTags = function(){
+    const uniqueTagsCounter = {};
     for(let article of fullListofArticles){
       const articleTagsList = article.querySelector(optSelectors.articleTags);
       let articleTagsListContent = '';
       const tags = article.getAttribute('data-tags').split(' ');
       for(let tag of tags){
-        articleTagsListContent += `<li><a href="#tag-${tag}">${tag}</a></li>`;
+        articleTagsListContent += optSelectors.articleTagTemplate(tag);
+        if(!uniqueTagsCounter[tag]){
+          uniqueTagsCounter[tag] = 1;
+        } else {
+          uniqueTagsCounter[tag]++;
+        }
       }
       articleTagsList.innerHTML = articleTagsListContent;
     }
+    generateTagsCloud(uniqueTagsCounter);
   };
 
   const tagClickHandler = function(e){
@@ -87,11 +124,11 @@
     const newActiveTagText =  newActiveTagLink.slice(substringsToRemoveLength.inTagLink);
     const activeTagLinks = document.querySelectorAll(optSelectors.activeTagLink);
     for(let activeTagLink of activeTagLinks){
-      activeTagLink.classList.remove(optActiveClass);
+      activeTagLink.classList.remove(optClassesConfig.activeClassName);
     }
     const newActiveTags = document.querySelectorAll(optSelectors.linkTemplate(newActiveTagLink));
     for(let newActiveTag of newActiveTags){
-      newActiveTag.classList.add(optActiveClass);
+      newActiveTag.classList.add(optClassesConfig.activeClassName);
     }
     generateTitleLinks(`${optSelectors.article}[data-tags~="${newActiveTagText}"]`);
   };
@@ -116,11 +153,11 @@
     const newActiveAuthorText =  newActiveAuthorLink.slice(substringsToRemoveLength.inAuthorLink);
     const activeAuthorLinks = document.querySelectorAll(optSelectors.activeArticleAuthor);
     for(let activeAuthorLink of activeAuthorLinks){
-      activeAuthorLink.classList.remove(optActiveClass);
+      activeAuthorLink.classList.remove(optClassesConfig.activeClassName);
     }
     const newActiveAuthors = document.querySelectorAll(optSelectors.linkTemplate(newActiveAuthorLink));
     for(let newActiveAuthor of newActiveAuthors){
-      newActiveAuthor.classList.add(optActiveClass);
+      newActiveAuthor.classList.add(optClassesConfig.activeClassName);
     }
     generateTitleLinks(`${optSelectors.article}[data-author="${newActiveAuthorText}"]`);
   };
