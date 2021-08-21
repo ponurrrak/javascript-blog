@@ -22,14 +22,15 @@
     articleTagTemplate: function(tag){
       return `<li><a href="#tag-${tag}">${tag}</a></li>`;
     },
-    cloudTagsLastLink: 'li:last-of-type a'
+    cloudTagsLastLink: 'li:last-of-type a',
+    authorsListWrapper: '.list.authors'
   };
 
   optSelectors.activeArticle = optSelectors.article + '.' + optClassesConfig.activeClassName;
   optSelectors.titleLinks = optSelectors.titleList + ' a';
   optSelectors.activeTitleLink = optSelectors.titleLinks + '.' + optClassesConfig.activeClassName;
   optSelectors.activeTagLink = optSelectors.tagLink + '.' + optClassesConfig.activeClassName;
-  optSelectors.activeArticleAuthor = optSelectors.articleAuthor + ' .' + optClassesConfig.activeClassName;
+  optSelectors.activeArticleAuthor = optSelectors.authorLink + '.' + optClassesConfig.activeClassName;
 
   const substringsToRemoveLength = {
     inTagLink: '#tag-'.length,
@@ -140,10 +141,27 @@
     }
   };
 
-  const generateAuthors = function(){
-    for(let article of fullListofArticles){
-      article.querySelector(optSelectors.articleAuthor).innerHTML = `<a href="#author-${article.getAttribute('data-author')}">by ${article.getAttribute('data-author')}</a>`;
+  const generateAuthorsList = function(articlesPerAuthor){
+    const authorsListWrapper = document.querySelector(optSelectors.authorsListWrapper);
+    let authorsListHTML = '';
+    for(let author in articlesPerAuthor){
+      authorsListHTML += `<li><a href="#author-${author}">${author}</a><span> (${articlesPerAuthor[author]})</span></li>`;
     }
+    authorsListWrapper.innerHTML = authorsListHTML;
+  };
+
+  const generateAuthors = function(){
+    const articlesPerAuthor = {};
+    for(let article of fullListofArticles){
+      const author = article.getAttribute('data-author');
+      article.querySelector(optSelectors.articleAuthor).innerHTML = `<a href="#author-${author}">by ${author}</a>`;
+      if(!articlesPerAuthor[author]){
+        articlesPerAuthor[author] = 1;
+      } else {
+        articlesPerAuthor[author]++;
+      }
+    }
+    generateAuthorsList(articlesPerAuthor);
   };
 
   const authorClickHandler = function(e){
