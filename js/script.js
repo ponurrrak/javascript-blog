@@ -13,7 +13,14 @@
     authorLink: 'a[href^="#author-"]',
     linkTemplate: function(link){
       return `a[href="${link}"]`;
-    }
+    },
+    tagsListWrapper: '.list.tags'
+  };
+
+  const substringsToRemoveLength = {
+    inTagLink: '#tag-'.length,
+    inTitleLink: '#'.length,
+    inAuthorLink: '#author-'.length
   };
 
   optSelectors.activeArticle = optSelectors.article + '.' + optActiveClass;
@@ -54,7 +61,7 @@
       link.addEventListener('click', titleClickHandler);
       const activeArticles = document.querySelectorAll(optSelectors.activeArticle);
       for(let activeArticle of activeArticles){
-        if(link.getAttribute('href').slice(1) === activeArticle.getAttribute('id')){
+        if(link.getAttribute('href').slice(substringsToRemoveLength.inTitleLink) === activeArticle.getAttribute('id')){
           link.classList.add(optActiveClass);
         }
       }
@@ -77,7 +84,7 @@
     e.preventDefault();
     const clickedElement = this;
     const newActiveTagLink = clickedElement.getAttribute('href');
-    const newActiveTagText =  newActiveTagLink.slice(5);
+    const newActiveTagText =  newActiveTagLink.slice(substringsToRemoveLength.inTagLink);
     const activeTagLinks = document.querySelectorAll(optSelectors.activeTagLink);
     for(let activeTagLink of activeTagLinks){
       activeTagLink.classList.remove(optActiveClass);
@@ -106,7 +113,7 @@
     e.preventDefault();
     const clickedElement = this;
     const newActiveAuthorLink = clickedElement.getAttribute('href');
-    const newActiveAuthorText =  newActiveAuthorLink.slice(8);
+    const newActiveAuthorText =  newActiveAuthorLink.slice(substringsToRemoveLength.inAuthorLink);
     const activeAuthorLinks = document.querySelectorAll(optSelectors.activeArticleAuthor);
     for(let activeAuthorLink of activeAuthorLinks){
       activeAuthorLink.classList.remove(optActiveClass);
