@@ -31,7 +31,7 @@
   };
 
   optSelectors.activeArticle = optSelectors.article + '.' + optClassesConfig.activeClassName;
-  optSelectors.titleLink = optSelectors.titleList + ' a';  
+  optSelectors.titleLink = optSelectors.titleList + ' a';
 
   const substringsToRemoveLength = {
     inTagLink: '#tag-'.length,
@@ -42,14 +42,14 @@
   const fullListofArticles = document.querySelectorAll(optSelectors.article);
 
   const removeActiveClass = function(...selectors){
-    selectors = selectors.join(`.${optClassesConfig.activeClassName}, `) + '.' + optClassesConfig.activeClassName;
+    selectors = selectors.join(`, `);
     const activeLinks = document.querySelectorAll(selectors);
     for(let activeLink of activeLinks){
       activeLink.classList.remove(optClassesConfig.activeClassName);
     }
   };
 
-  const addActiveClass = function(selector){    
+  const addActiveClass = function(selector){
     const newActiveLinks = document.querySelectorAll(selector);
     for(let newActiveLink of newActiveLinks){
       newActiveLink.classList.add(optClassesConfig.activeClassName);
